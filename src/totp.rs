@@ -10,12 +10,12 @@ use crate::prelude::AppError;
 
 type HmacSha1 = Hmac<Sha1>;
 
-const TIME_STEP: u64 = 30;
-const CODE_LENGTH: usize = 6;
-
 pub struct Totp;
 
 impl Totp {
+    const TIME_STEP: u64 = 30;
+    const CODE_LENGTH: usize = 6;
+
     pub fn display(secret: &str) -> Result<(), AppError> {
         loop {
             let (code, remaining) = Self::generate(secret)?;
@@ -34,8 +34,8 @@ impl Totp {
             .ok_or_else(|| AppError::FailedTOTP("Invalid base32 secret".into()))?;
 
         let current_time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
-        let time_counter = current_time / TIME_STEP;
-        let time_remaining = TIME_STEP - (current_time % TIME_STEP);
+        let time_counter = current_time / Self::TIME_STEP;
+        let time_remaining = Self::TIME_STEP - (current_time % Self::TIME_STEP);
         
         let message = time_counter.to_be_bytes();
 
@@ -50,9 +50,10 @@ impl Totp {
             | ((hmac_hash[offset + 2] as u32 & 0xFF) << 8)
             | (hmac_hash[offset + 3] as u32 & 0xFF);
 
-        let code = binary_code % 10u32.pow(CODE_LENGTH as u32);
+        let width = Self::CODE_LENGTH;
+        let code = binary_code % 10u32.pow(width as u32);
         
-        Ok((format!("{code:0>CODE_LENGTH$}"), time_remaining))
+        Ok((format!("{code:0>width$}"), time_remaining))
     }
 }
 
@@ -66,9 +67,9 @@ mod test {
         assert!(result.is_ok());
 
         let (code, remaining) = result.unwrap();
-        assert_eq!(code.len(), CODE_LENGTH);
+        assert_eq!(code.len(), Totp::CODE_LENGTH);
         assert!(code.chars().all(|c| c.is_ascii_digit()));
-        assert!(remaining <= TIME_STEP);
+        assert!(remaining <= Totp::TIME_STEP);
     }
 
     #[test]

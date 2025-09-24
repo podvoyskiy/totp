@@ -12,7 +12,7 @@ rust-version = "1.88.0"
 
 [dependencies]
 base32 = "0.5.1"
+directories = "6.0.0"
 hmac = "0.12.1"
 rpassword = "7.4.0"
 sha1 = "0.10.6"
-xdg = "3.0.0"
