@@ -38,6 +38,14 @@ impl Storage {
 
         Ok(Self { services: gpg_files})
     }
+
+    pub fn find_service_by_name(&self, service_name: &str) -> Option<&PathBuf> {
+        self.services.iter().find(|path| {
+            path.file_stem()
+                .map(|stem| stem.to_string_lossy() == service_name)
+                .unwrap_or(false)
+        })
+    }
 }
 
 #[cfg(test)]
