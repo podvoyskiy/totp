@@ -10,18 +10,22 @@ mod prelude {
 }
 use prelude::*;
 
+use colored::*;
+
 use std::{env, path::PathBuf, process::Command};
 use rpassword::read_password;
 
 fn main() -> Result<(), AppError> {
-    let mut args: Vec<String> = env::args().collect();
-    args.remove(0); //remove program name
+    let args: Vec<String> = env::args().collect();
 
     let storage = Storage::load()?;
-    //TODO if error - show "No services found. Run 'totp --add' to add first service"
 
     match args.len() {
-        0 => {
+        1 => {
+            if storage.services.is_empty() {
+                println!("{}", "No services found. Run 'totp --add' to add first service".yellow());
+                return Ok(());
+            }
             println!("Select service:");
             storage.services.iter().enumerate().for_each(|(index, path)| {
                 if let Some(item) = path.file_stem() {
@@ -39,21 +43,26 @@ fn main() -> Result<(), AppError> {
 
             decrypting( &storage.services[choice - 1])
         }
-        1 => {
-            if &args[0] == "--add" {
+        2 => {
+            if &args[1] == "--help" {
+                storage.print_help();
+                return Ok(());
+            } 
+
+            if &args[1] == "--add" {
                 println!("TODO Add service");
                 return Ok(());
             } 
 
-            if let Some(service) = storage.find_service_by_name(&args[0]) {
+            if let Some(service) = storage.find_service_by_name(&args[1]) {
                 decrypting(service)
             } else {
-                println!("service {} not found in config", &args[0]);
+                println!("{}", format!("service {} not found in config", &args[1]).yellow());
                 Ok(())
             }
         }
         _ => {
-            println!("Show help");
+            storage.print_help();
             Ok(())
         }
     }
