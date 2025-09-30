@@ -1,7 +1,6 @@
 use std::{fs, path::PathBuf};
 use crate::prelude::AppError;
 use directories::ProjectDirs;
-use regex::Regex;
 
 pub struct Storage {
     pub config_dir: PathBuf,
@@ -49,8 +48,7 @@ impl Storage {
         if service_name.len() > 255 {
             return false;
         }
-        let valid_chars = Regex::new(r"^[a-zA-Z0-9_-]+$").unwrap();
-        valid_chars.is_match(service_name)
+        service_name.chars().all(|c| matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-'))
     }
 
     pub fn get_service_path(&self, service_name: &str) -> PathBuf {
