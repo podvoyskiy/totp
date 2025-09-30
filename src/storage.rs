@@ -9,7 +9,7 @@ pub struct Storage {
 }
 
 impl Storage {
-    pub fn load(crypto: Box<dyn Crypto>) -> Result<Self, AppError> {
+    pub fn new(crypto: Box<dyn Crypto>) -> Result<Self, AppError> {
         let project_dirs = ProjectDirs::from("", "", env!("CARGO_PKG_NAME"))
             .ok_or(AppError::StorageLoad("Failed to get config directory".into()))?;
 
@@ -24,7 +24,7 @@ impl Storage {
             return Err(AppError::StorageLoad(format!("Config path is not a directory: {}", config_dir.display())));
         }
 
-        let gpg_files: Vec<PathBuf> = fs::read_dir(config_dir)?
+        let services: Vec<PathBuf> = fs::read_dir(config_dir)?
             .filter_map(Result::ok)
             .map(|entry| entry.path())
             .filter(|path| {
@@ -35,7 +35,7 @@ impl Storage {
         Ok(Self {
             crypto, 
             config_dir: config_dir.to_path_buf(), 
-            services: gpg_files
+            services
         })
     }
 
@@ -47,15 +47,15 @@ impl Storage {
         })
     }
 
+    pub fn get_service_path(&self, service_name: &str) -> PathBuf {
+        self.config_dir.join(format!("{}.{}", service_name, self.crypto.get_extension_files()))
+    }
+
     pub fn validate_file_name(service_name: &str) -> bool {
         if service_name.len() > 255 {
             return false;
         }
         service_name.chars().all(|c| matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-'))
-    }
-
-    pub fn get_service_path(&self, service_name: &str) -> PathBuf {
-        self.config_dir.join(format!("{}.{}", service_name, self.crypto.get_extension_files()))
     }
 }
 
@@ -67,6 +67,6 @@ mod test {
 
     #[test]
     fn storage_load() {
-        assert!(Storage::load(Box::new(CryptoGpg)).is_ok())
+        assert!(Storage::new(Box::new(CryptoGpg)).is_ok())
     }
 }

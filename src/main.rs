@@ -19,7 +19,7 @@ use std::{env, io};
 fn main() -> Result<(), AppError> {
     let args: Vec<String> = env::args().collect();
 
-    let storage = Storage::load(Box::new(CryptoGpg))?;
+    let storage = Storage::new(Box::new(CryptoGpg))?;
 
     match args.len() {
         1 => {
