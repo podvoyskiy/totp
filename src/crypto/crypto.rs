@@ -1,9 +1,11 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use crate::{prelude::AppError};
 
 pub trait Crypto {
-    fn encrypting(path_to_file: &PathBuf) -> Result<(), AppError>;
+    fn get_extension_files(&self) -> &str;
 
-    fn decrypting(path_to_file: &PathBuf) -> Result<(), AppError>;
+    fn encrypting(&self, path_to_file: &Path) -> Result<(), AppError>;
+
+    fn decrypting(&self, path_to_file: &Path) -> Result<(), AppError>;
 }

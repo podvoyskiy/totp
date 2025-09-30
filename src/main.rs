@@ -19,7 +19,7 @@ use std::{env, io};
 fn main() -> Result<(), AppError> {
     let args: Vec<String> = env::args().collect();
 
-    let storage = Storage::load()?;
+    let storage = Storage::load(Box::new(CryptoGpg))?;
 
     match args.len() {
         1 => {
@@ -42,7 +42,7 @@ fn main() -> Result<(), AppError> {
                 return Err(AppError::InvalidInput("Invalid service selection".into()));
             }
 
-            CryptoGpg::decrypting( &storage.services[choice - 1])
+            storage.crypto.decrypting(&storage.services[choice - 1])
         }
         2 => {
             if &args[1] == "--help" {
@@ -60,12 +60,12 @@ fn main() -> Result<(), AppError> {
                     return Err(AppError::InvalidInput("incorrect service name".into()));
                 }
 
-                CryptoGpg::encrypting(&storage.get_service_path(&service_name))?;
+                storage.crypto.encrypting(&storage.get_service_path(&service_name))?;
                 return Ok(());
             } 
 
             if let Some(service) = storage.find_service_by_name(&args[1]) {
-                CryptoGpg::decrypting(service)
+                storage.crypto.decrypting(service)
             } else {
                 println!("{}", format!("service {} not found in config", &args[1]).yellow());
                 Ok(())

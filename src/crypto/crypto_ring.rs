@@ -1,15 +1,19 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use crate::{prelude::{AppError, Crypto}};
 
 pub struct CryptoRing;
 
 impl Crypto for CryptoRing {
-    fn encrypting(path_to_file: &PathBuf) -> Result<(), AppError> {
+    fn get_extension_files(&self) -> &str {
+        "enc"
+    }
+
+    fn encrypting(&self, _path_to_file: &Path) -> Result<(), AppError> {
         Ok(())
     }
 
-    fn decrypting(path_to_file: &PathBuf) -> Result<(), crate::prelude::AppError> {
+    fn decrypting(&self, _path_to_file: &Path) -> Result<(), crate::prelude::AppError> {
         Ok(())
     }
 }

@@ -1,16 +1,15 @@
 use std::{fs, path::PathBuf};
-use crate::prelude::AppError;
+use crate::{prelude::{AppError, Crypto}};
 use directories::ProjectDirs;
 
 pub struct Storage {
+    pub crypto: Box<dyn Crypto>,
     pub config_dir: PathBuf,
     pub services: Vec<PathBuf>,
 }
 
 impl Storage {
-    const GPG_EXTENSION: &str = "gpg";
-
-    pub fn load() -> Result<Self, AppError> {
+    pub fn load(crypto: Box<dyn Crypto>) -> Result<Self, AppError> {
         let project_dirs = ProjectDirs::from("", "", env!("CARGO_PKG_NAME"))
             .ok_or(AppError::StorageLoad("Failed to get config directory".into()))?;
 
@@ -29,11 +28,15 @@ impl Storage {
             .filter_map(Result::ok)
             .map(|entry| entry.path())
             .filter(|path| {
-                path.is_file() && path.extension().is_some_and(|ext| ext == Self::GPG_EXTENSION)
+                path.is_file() && path.extension().is_some_and(|ext| ext == crypto.get_extension_files())
             })
             .collect();
 
-        Ok(Self { config_dir: config_dir.to_path_buf(),  services: gpg_files})
+        Ok(Self {
+            crypto, 
+            config_dir: config_dir.to_path_buf(), 
+            services: gpg_files
+        })
     }
 
     pub fn find_service_by_name(&self, service_name: &str) -> Option<&PathBuf> {
@@ -52,16 +55,18 @@ impl Storage {
     }
 
     pub fn get_service_path(&self, service_name: &str) -> PathBuf {
-        self.config_dir.join(format!("{}.{}", service_name, Self::GPG_EXTENSION))
+        self.config_dir.join(format!("{}.{}", service_name, self.crypto.get_extension_files()))
     }
 }
 
 #[cfg(test)]
 mod test {
+    use crate::crypto::CryptoGpg;
+
     use super::Storage;
 
     #[test]
     fn storage_load() {
-        assert!(Storage::load().is_ok())
+        assert!(Storage::load(Box::new(CryptoGpg)).is_ok())
     }
 }

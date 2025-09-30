@@ -1,4 +1,4 @@
-use std::{io::Write, path::PathBuf, process::{Command, Stdio}};
+use std::{io::Write, path::Path, process::{Command, Stdio}};
 
 use colored::Colorize;
 use rpassword::read_password;
@@ -8,7 +8,11 @@ use crate::{prelude::{AppError, Totp, Crypto}};
 pub struct CryptoGpg;
 
 impl Crypto for CryptoGpg {
-    fn encrypting(path_to_file: &PathBuf) -> Result<(), AppError> {
+    fn get_extension_files(&self) -> &str {
+        "gpg"
+    }
+
+    fn encrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
         println!("Insert TOTP secret:");
         let secret = read_password()?;
 
@@ -47,7 +51,7 @@ impl Crypto for CryptoGpg {
         Ok(())
     }
 
-    fn decrypting(path_to_file: &PathBuf) -> Result<(), AppError> {
+    fn decrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
         println!("Enter password for decryption:");
         let password = read_password()?;
 
