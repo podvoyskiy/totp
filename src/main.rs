@@ -8,7 +8,7 @@ mod prelude {
     pub use crate::totp::Totp;
     pub use crate::errors::AppError;
     pub use crate::storage::Storage;
-    pub use crate::crypto::Crypto;
+    pub use crate::crypto::{Crypto, CryptoGpg};
 }
 use prelude::*;
 
@@ -42,7 +42,7 @@ fn main() -> Result<(), AppError> {
                 return Err(AppError::InvalidInput("Invalid service selection".into()));
             }
 
-            Crypto::decrypting( &storage.services[choice - 1])
+            CryptoGpg::decrypting( &storage.services[choice - 1])
         }
         2 => {
             if &args[1] == "--help" {
@@ -60,12 +60,12 @@ fn main() -> Result<(), AppError> {
                     return Err(AppError::InvalidInput("incorrect service name".into()));
                 }
 
-                Crypto::encrypting(&storage, &service_name)?;
+                CryptoGpg::encrypting(&storage.get_service_path(&service_name))?;
                 return Ok(());
             } 
 
             if let Some(service) = storage.find_service_by_name(&args[1]) {
-                Crypto::decrypting(service)
+                CryptoGpg::decrypting(service)
             } else {
                 println!("{}", format!("service {} not found in config", &args[1]).yellow());
                 Ok(())

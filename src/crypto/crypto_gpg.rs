@@ -3,21 +3,19 @@ use std::{io::Write, path::PathBuf, process::{Command, Stdio}};
 use colored::Colorize;
 use rpassword::read_password;
 
-use crate::prelude::{AppError, Totp, Storage};
+use crate::{prelude::{AppError, Totp, Crypto}};
 
-pub struct Crypto;
+pub struct CryptoGpg;
 
-impl Crypto {
-    pub fn encrypting(storage: &Storage, service_name: &str) -> Result<(), AppError> {
-        println!("Insert TOTP secret for {service_name}:");
+impl Crypto for CryptoGpg {
+    fn encrypting(path_to_file: &PathBuf) -> Result<(), AppError> {
+        println!("Insert TOTP secret:");
         let secret = read_password()?;
 
         Totp::generate(&secret)?; //just to validate secret
 
         println!("Enter password for encryption:");
         let password = read_password()?;
-
-        let output_path = storage.get_service_path(service_name);
 
         println!("{}", "Encrypting...".blue());
 
@@ -29,7 +27,7 @@ impl Crypto {
             .arg("0")
             .arg("-c")
             .arg("-o")
-            .arg(&output_path)
+            .arg(path_to_file)
             .stdin(Stdio::piped())
             .spawn()?;
 
@@ -44,12 +42,12 @@ impl Crypto {
             return Err(AppError::InvalidInput(format!("Encryption failed: {}", error_msg.trim())));
         }
 
-        println!("{}", format!("Successfully encrypted and saved to: {}", output_path.display()).green());
+        println!("{}", format!("Successfully encrypted and saved to: {}", path_to_file.display()).green());
 
         Ok(())
     }
 
-    pub fn decrypting(service: &PathBuf) -> Result<(), AppError> {
+    fn decrypting(path_to_file: &PathBuf) -> Result<(), AppError> {
         println!("Enter password for decryption:");
         let password = read_password()?;
 
@@ -61,7 +59,7 @@ impl Crypto {
             .arg("--batch")
             .arg("--passphrase")
             .arg(password) 
-            .arg(service)
+            .arg(path_to_file)
             .output()?;
         
         
