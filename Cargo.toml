@@ -1,7 +1,7 @@
 [package]
 name = "totp"
 description = "Command-line TOTP (Time-based One-Time Password) generator for two-factor authentication"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 authors = ["Podvoyskiy Ilya <ilya.podvoyskiy@gmail.com>"]
 license = "MIT"
@@ -12,7 +12,9 @@ rust-version = "1.88.0"
 
 [dependencies]
 base32 = "0.5.1"
+colored = "3.0.0"
 directories = "6.0.0"
 hmac = "0.12.1"
+regex = "1.11.3"
 rpassword = "7.4.0"
 sha1 = "0.10.6"

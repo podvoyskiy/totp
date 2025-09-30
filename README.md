@@ -4,37 +4,37 @@ Command-line TOTP (Time-based One-Time Password) generator for two-factor authen
 
 **Platform:** Linux only
 
-### Installation & Usage
+### Installation
 
-1. Create configuration directory
-    ```bash
-    mkdir -p ~/.config/totp
-    ```
-
-2. Add Your TOTP Secret (Encrypted)
-    ```bash
-    # Use two spaces to prevent the command from being saved in shell history
-      echo "your_base32_secret_here" | gpg -c > ~/.config/totp/your_service.gpg
-    ```
-
-    Replace:
-    + `"your_base32_secret_here"` with your actual TOTP secret key
-    + `your_service.gpg` with a descriptive name (e.g., `github.gpg`, `google.gpg`)
-
-3. Download Binary
+1. Download Binary
     ```bash
     wget https://github.com/podvoyskiy/totp/releases/latest/download/totp
     ```
 
-4. Make it Executable
+2. Make it Executable
     ```bash
     chmod +x totp
     ```
 
-4. Run app
-    ```
-    ./totp
-    ```
+### Usage
+
+#### First Time Setup
+```bash
+./totp --add
+```
+Follow the prompts to add your first TOTP service.
+
+#### Interactive Mode
+```bash
+./totp
+```
+List and select from available services.
+
+#### Direct Access
+```bash
+./totp <service_name>
+```
+Example: ./totp github
 
 ### What to Expect
 
@@ -42,13 +42,13 @@ When you run the tool, it will:
 
     📋 List all available services from ~/.config/totp/
 
-    🔢 Prompt you to select a service by number
+    🔢 Prompt to select a service by number (or use direct access)
 
-    🔐 Ask for your GPG password to decrypt the secret
+    🔐 Ask for your GPG password to decrypt secret
 
-    ⏱️ Display the TOTP code with a live countdown timer
+    ⏱️ Display TOTP code with live countdown timer
 
-    🔄 Automatically update the code every 30 seconds
+    🔄 Automatically update code every 30 seconds
 
 ### Example
 
@@ -58,7 +58,7 @@ Select service:
 1 : github
 2 : google
 > 1
-Enter password:
+Enter password for decryption:
 Decrypting...
 Code: 123456 | █████████████░░░░░░░░░░░░░ | Time remaining: 15s
 ```

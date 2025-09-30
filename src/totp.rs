@@ -29,7 +29,7 @@ impl Totp {
         }
     }
 
-    fn generate(secret: &str) -> Result<(String, u64), AppError> {
+    pub fn generate(secret: &str) -> Result<(String, u64), AppError> {
         let secret = base32::decode(Alphabet::Rfc4648 { padding: false }, &secret.trim().to_uppercase())
             .ok_or_else(|| AppError::FailedTOTP("Invalid base32 secret".into()))?;
 

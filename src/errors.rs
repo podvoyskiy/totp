@@ -1,8 +1,9 @@
 use std::{error, fmt, io, num::ParseIntError, time::SystemTimeError};
 
+use colored::*;
+
 use hmac::digest::InvalidLength;
 
-#[derive(Debug)]
 pub enum AppError {
     Io(io::Error),
     ParseIntError(ParseIntError),
@@ -11,15 +12,22 @@ pub enum AppError {
     FailedTOTP(String),
 }
 
+impl fmt::Debug for AppError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
+}
+
 impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            AppError::Io(err) => write!(f, "I/O error: {err}"),
-            AppError::ParseIntError(err) => write!(f, "Parse int error: {err}"),
-            AppError::StorageLoad(msg) => write!(f, "Storage error: {msg}"),
-            AppError::InvalidInput(msg) => write!(f, "Invalid input: {msg}"),
-            AppError::FailedTOTP(msg) => write!(f, "TOTP error: {msg}"),
-        }
+        let message = match self {
+            AppError::Io(err) => format!("I/O error | {err}").red(),
+            AppError::ParseIntError(err) => format!("Parse int error | {err}").red(),
+            AppError::StorageLoad(msg) => format!("Storage error | {msg}").red(),
+            AppError::InvalidInput(msg) => format!("Invalid input | {msg}").red(),
+            AppError::FailedTOTP(msg) => format!("TOTP error | {msg}").red(),
+        };
+        write!(f, "{message}")
     }
 }
 
