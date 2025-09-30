@@ -58,7 +58,7 @@ Select service:
 1 : github
 2 : google
 > 1
-Enter password for decryption:
+Enter password:
 Decrypting...
 Code: 123456 | █████████████░░░░░░░░░░░░░ | Time remaining: 15s
 ```

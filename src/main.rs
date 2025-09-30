@@ -8,7 +8,7 @@ mod prelude {
     pub use crate::totp::Totp;
     pub use crate::errors::AppError;
     pub use crate::storage::Storage;
-    pub use crate::crypto::{Crypto, CryptoGpg};
+    pub use crate::crypto::{Crypto, RingCrypto, GpgCrypto};
 }
 use prelude::*;
 
@@ -19,7 +19,12 @@ use std::{env, io};
 fn main() -> Result<(), AppError> {
     let args: Vec<String> = env::args().collect();
 
-    let storage = Storage::new(Box::new(CryptoGpg))?;
+    let crypto: Box<dyn Crypto> = match cfg!(target_os = "linux") && GpgCrypto::is_available() {
+        true => Box::new(GpgCrypto),
+        false => Box::new(RingCrypto),
+    };
+    
+    let storage = Storage::new(crypto)?;
 
     match args.len() {
         1 => {

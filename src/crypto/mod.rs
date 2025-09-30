@@ -1,6 +1,7 @@
-mod crypto;
-mod crypto_ring;
-mod crypto_gpg;
+mod crypto_trait;
+mod ring;
+mod gpg;
 
-pub use crypto::*;
-pub use crypto_gpg::*;
+pub use crypto_trait::Crypto;
+pub use ring::RingCrypto;
+pub use gpg::GpgCrypto;

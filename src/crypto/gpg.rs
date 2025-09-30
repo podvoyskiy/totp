@@ -1,25 +1,29 @@
 use std::{io::Write, path::Path, process::{Command, Stdio}};
 
 use colored::Colorize;
-use rpassword::read_password;
 
 use crate::{prelude::{AppError, Totp, Crypto}};
 
-pub struct CryptoGpg;
+pub struct GpgCrypto;
 
-impl Crypto for CryptoGpg {
+impl GpgCrypto {
+    pub fn is_available() -> bool {
+        Command::new("gpg")
+            .arg("--version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false)
+    }
+}
+
+impl Crypto for GpgCrypto {
     fn get_extension_files(&self) -> &str {
         "gpg"
     }
 
     fn encrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
-        println!("Insert TOTP secret:");
-        let secret = read_password()?;
-
-        Totp::generate(&secret)?; //just to validate secret
-
-        println!("Enter password for encryption:");
-        let password = read_password()?;
+        let secret = self.get_secret()?;
+        let password = self.get_password()?;
 
         println!("{}", "Encrypting...".blue());
 
@@ -52,8 +56,7 @@ impl Crypto for CryptoGpg {
     }
 
     fn decrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
-        println!("Enter password for decryption:");
-        let password = read_password()?;
+        let password = self.get_password()?;
 
         println!("{}", "Decrypting...".blue());
 

@@ -61,12 +61,12 @@ impl Storage {
 
 #[cfg(test)]
 mod test {
-    use crate::crypto::CryptoGpg;
+    use crate::crypto::GpgCrypto;
 
     use super::Storage;
 
     #[test]
     fn storage_load() {
-        assert!(Storage::new(Box::new(CryptoGpg)).is_ok())
+        assert!(Storage::new(Box::new(GpgCrypto)).is_ok())
     }
 }
