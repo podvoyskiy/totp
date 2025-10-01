@@ -19,7 +19,7 @@ use std::{env, io};
 fn main() -> Result<(), AppError> {
     let args: Vec<String> = env::args().collect();
 
-    let crypto: Box<dyn Crypto> = match cfg!(target_os = "linux") && GpgCrypto::is_available() {
+    let crypto: Box<dyn Crypto> = match cfg!(target_os = "linux") && !GpgCrypto::is_available() {
         true => Box::new(GpgCrypto),
         false => Box::new(RingCrypto),
     };

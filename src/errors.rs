@@ -3,6 +3,7 @@ use std::{error, fmt, io, num::ParseIntError, time::SystemTimeError};
 use colored::*;
 
 use hmac::digest::InvalidLength;
+use ring::error::Unspecified;
 
 pub enum AppError {
     Io(io::Error),
@@ -10,6 +11,7 @@ pub enum AppError {
     StorageLoad(String),
     InvalidInput(String),
     FailedTOTP(String),
+    Encrypt(String),
 }
 
 impl fmt::Debug for AppError {
@@ -26,6 +28,7 @@ impl fmt::Display for AppError {
             AppError::StorageLoad(msg) => format!("Storage error | {msg}").red(),
             AppError::InvalidInput(msg) => format!("Invalid input | {msg}").red(),
             AppError::FailedTOTP(msg) => format!("TOTP error | {msg}").red(),
+            AppError::Encrypt(msg) => format!("Encrypt error | {msg}").red(),
         };
         write!(f, "{message}")
     }
@@ -54,5 +57,11 @@ impl From<SystemTimeError> for AppError {
 impl From<InvalidLength> for AppError {
     fn from(value: InvalidLength) -> Self {
         AppError::FailedTOTP(value.to_string())
+    }
+}
+
+impl From<Unspecified> for AppError {
+    fn from(value: Unspecified) -> Self {
+        AppError::Encrypt(value.to_string())
     }
 }
