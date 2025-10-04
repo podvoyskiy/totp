@@ -19,7 +19,7 @@ use std::{env, io};
 fn main() -> Result<(), AppError> {
     let args: Vec<String> = env::args().collect();
 
-    let crypto: Box<dyn Crypto> = match cfg!(target_os = "linux") && !GpgCrypto::is_available() {
+    let crypto: Box<dyn Crypto> = match cfg!(target_os = "linux") && GpgCrypto::is_available() {
         true => Box::new(GpgCrypto),
         false => Box::new(RingCrypto),
     };
@@ -49,12 +49,7 @@ fn main() -> Result<(), AppError> {
 
             storage.crypto.decrypting(&storage.services[choice - 1])
         }
-        2 => {
-            if &args[1] == "--help" {
-                print_help();
-                return Ok(());
-            } 
-
+        _ => {
             if &args[1] == "--add" {
                 println!("Enter service name:");
                 let mut service_name = String::new();
@@ -67,16 +62,8 @@ fn main() -> Result<(), AppError> {
 
                 storage.crypto.encrypting(&storage.get_service_path(&service_name))?;
                 return Ok(());
-            } 
-
-            if let Some(service) = storage.find_service_by_name(&args[1]) {
-                storage.crypto.decrypting(service)
-            } else {
-                println!("{}", format!("service {} not found in config", &args[1]).yellow());
-                Ok(())
             }
-        }
-        _ => {
+
             print_help();
             Ok(())
         }
@@ -84,9 +71,7 @@ fn main() -> Result<(), AppError> {
 }
 
 fn print_help() {
-    println!("{}{}{}", "Usage:".yellow().bold(), " totp".blue().bold(), " [OPTION]".blue());
+    println!("{}{}", "Usage:".yellow().bold(), " totp".blue().bold());
     println!("{}", "Options:".yellow().bold());
-    println!("{}               Show this help", "  --help".blue().bold());
-    println!("{}                Add new service", "  --add".blue().bold());
-    println!("{}       Service selection at start", "  {service_name}".blue().bold());
+    println!("{}    Add new service", "  --add".blue().bold());
 }

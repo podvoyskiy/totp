@@ -39,14 +39,6 @@ impl Storage {
         })
     }
 
-    pub fn find_service_by_name(&self, service_name: &str) -> Option<&PathBuf> {
-        self.services.iter().find(|path| {
-            path.file_stem()
-                .map(|stem| stem.to_string_lossy() == service_name)
-                .unwrap_or(false)
-        })
-    }
-
     pub fn get_service_path(&self, service_name: &str) -> PathBuf {
         self.config_dir.join(format!("{}.{}", service_name, self.crypto.get_extension_files()))
     }

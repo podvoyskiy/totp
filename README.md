@@ -30,19 +30,13 @@ Follow the prompts to add your first TOTP service.
 ```
 List and select from available services.
 
-#### Direct Access
-```bash
-./totp <service_name>
-```
-Example: ./totp github
-
 ### What to Expect
 
 When you run the tool, it will:
 
     📋 List all available services from ~/.config/totp/
 
-    🔢 Prompt to select a service by number (or use direct access)
+    🔢 Prompt to select a service by number
 
     🔐 Ask for your GPG password to decrypt secret
 
