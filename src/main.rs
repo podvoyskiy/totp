@@ -8,7 +8,9 @@ mod prelude {
     pub use crate::totp::Totp;
     pub use crate::errors::AppError;
     pub use crate::storage::Storage;
-    pub use crate::crypto::Crypto;
+    pub use crate::crypto::{Crypto, NativeCrypto, create_crypto};
+    #[allow(unused_imports)]
+    pub use crate::crypto::GpgCrypto;
 }
 use prelude::*;
 
@@ -19,7 +21,9 @@ use std::{env, io};
 fn main() -> Result<(), AppError> {
     let args: Vec<String> = env::args().collect();
 
-    let storage = Storage::load()?;
+    let crypto = create_crypto();
+    
+    let storage = Storage::new(crypto)?;
 
     match args.len() {
         1 => {
@@ -42,14 +46,9 @@ fn main() -> Result<(), AppError> {
                 return Err(AppError::InvalidInput("Invalid service selection".into()));
             }
 
-            Crypto::decrypting( &storage.services[choice - 1])
+            storage.crypto.decrypting(&storage.services[choice - 1])
         }
-        2 => {
-            if &args[1] == "--help" {
-                print_help();
-                return Ok(());
-            } 
-
+        _ => {
             if &args[1] == "--add" {
                 println!("Enter service name:");
                 let mut service_name = String::new();
@@ -60,18 +59,10 @@ fn main() -> Result<(), AppError> {
                     return Err(AppError::InvalidInput("incorrect service name".into()));
                 }
 
-                Crypto::encrypting(&storage, &service_name)?;
+                storage.crypto.encrypting(&storage.get_service_path(&service_name))?;
                 return Ok(());
-            } 
-
-            if let Some(service) = storage.find_service_by_name(&args[1]) {
-                Crypto::decrypting(service)
-            } else {
-                println!("{}", format!("service {} not found in config", &args[1]).yellow());
-                Ok(())
             }
-        }
-        _ => {
+
             print_help();
             Ok(())
         }
@@ -79,9 +70,7 @@ fn main() -> Result<(), AppError> {
 }
 
 fn print_help() {
-    println!("{}{}{}", "Usage:".yellow().bold(), " totp".blue().bold(), " [OPTION]".blue());
+    println!("{}{}", "Usage:".yellow().bold(), " totp".blue().bold());
     println!("{}", "Options:".yellow().bold());
-    println!("{}               Show this help", "  --help".blue().bold());
-    println!("{}                Add new service", "  --add".blue().bold());
-    println!("{}       Service selection at start", "  {service_name}".blue().bold());
+    println!("{}    Add new service", "  --add".blue().bold());
 }

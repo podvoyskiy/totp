@@ -1,4 +1,4 @@
-use std::{error, fmt, io, num::ParseIntError, time::SystemTimeError};
+use std::{error, fmt, io, num::ParseIntError, string::FromUtf8Error, time::SystemTimeError};
 
 use colored::*;
 
@@ -10,6 +10,8 @@ pub enum AppError {
     StorageLoad(String),
     InvalidInput(String),
     FailedTOTP(String),
+    Encrypt(String),
+    InvalidData,
 }
 
 impl fmt::Debug for AppError {
@@ -26,6 +28,8 @@ impl fmt::Display for AppError {
             AppError::StorageLoad(msg) => format!("Storage error | {msg}").red(),
             AppError::InvalidInput(msg) => format!("Invalid input | {msg}").red(),
             AppError::FailedTOTP(msg) => format!("TOTP error | {msg}").red(),
+            AppError::Encrypt(msg) => format!("Encrypt error | {msg}").red(),
+            AppError::InvalidData => "Invalid data | Decrypted data is not valid UTF-8".to_string() .red(),
         };
         write!(f, "{message}")
     }
@@ -54,5 +58,11 @@ impl From<SystemTimeError> for AppError {
 impl From<InvalidLength> for AppError {
     fn from(value: InvalidLength) -> Self {
         AppError::FailedTOTP(value.to_string())
+    }
+}
+
+impl From<FromUtf8Error> for AppError {
+    fn from(_value: FromUtf8Error) -> Self {
+        AppError::InvalidData
     }
 }

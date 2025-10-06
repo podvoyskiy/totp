@@ -1,23 +1,30 @@
-use std::{io::Write, path::PathBuf, process::{Command, Stdio}};
+use std::{io::Write, path::Path, process::{Command, Stdio}};
 
 use colored::Colorize;
-use rpassword::read_password;
 
-use crate::prelude::{AppError, Totp, Storage};
+use crate::{prelude::{AppError, Totp, Crypto}};
 
-pub struct Crypto;
+pub struct GpgCrypto;
 
-impl Crypto {
-    pub fn encrypting(storage: &Storage, service_name: &str) -> Result<(), AppError> {
-        println!("Insert TOTP secret for {service_name}:");
-        let secret = read_password()?;
+impl GpgCrypto {
+    #[allow(dead_code)]
+    pub fn is_available() -> bool {
+        Command::new("gpg")
+            .arg("--version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false)
+    }
+}
 
-        Totp::generate(&secret)?; //just to validate secret
+impl Crypto for GpgCrypto {
+    fn get_extension_files(&self) -> &str {
+        "gpg"
+    }
 
-        println!("Enter password for encryption:");
-        let password = read_password()?;
-
-        let output_path = storage.get_service_path(service_name);
+    fn encrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
+        let secret = self.get_secret()?;
+        let password = self.get_password()?;
 
         println!("{}", "Encrypting...".blue());
 
@@ -29,7 +36,7 @@ impl Crypto {
             .arg("0")
             .arg("-c")
             .arg("-o")
-            .arg(&output_path)
+            .arg(path_to_file)
             .stdin(Stdio::piped())
             .spawn()?;
 
@@ -41,17 +48,16 @@ impl Crypto {
 
         if !output.status.success() {
             let error_msg = String::from_utf8_lossy(&output.stderr);
-            return Err(AppError::InvalidInput(format!("Encryption failed: {}", error_msg.trim())));
+            return Err(AppError::Encrypt(format!("Encryption failed: {}", error_msg.trim())));
         }
 
-        println!("{}", format!("Successfully encrypted and saved to: {}", output_path.display()).green());
+        println!("{}", format!("Successfully encrypted and saved to: {}", path_to_file.display()).green());
 
         Ok(())
     }
 
-    pub fn decrypting(service: &PathBuf) -> Result<(), AppError> {
-        println!("Enter password for decryption:");
-        let password = read_password()?;
+    fn decrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
+        let password = self.get_password()?;
 
         println!("{}", "Decrypting...".blue());
 
@@ -61,13 +67,13 @@ impl Crypto {
             .arg("--batch")
             .arg("--passphrase")
             .arg(password) 
-            .arg(service)
+            .arg(path_to_file)
             .output()?;
         
         
         if !output.status.success() {
             let error_msg = String::from_utf8_lossy(&output.stderr);
-            return Err(AppError::InvalidInput(format!("Decryption failed: {}", error_msg.trim())));
+            return Err(AppError::Encrypt(format!("Decryption failed: {}", error_msg.trim())));
         }
 
         let secret = String::from_utf8_lossy(&output.stdout).trim().to_owned();
