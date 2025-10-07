@@ -4,10 +4,17 @@ use colored::Colorize;
 use chacha20poly1305::{ChaCha20Poly1305, Key, KeyInit, Nonce};
 use chacha20poly1305::aead::Aead;
 use rand::RngCore;
+use sha2::Sha256;
+use pbkdf2::pbkdf2;
+use hmac::Hmac;
 
 use crate::{prelude::{AppError, Crypto, Totp}};
 
 pub struct NativeCrypto;
+
+impl NativeCrypto {
+    const PBKDF2_ITERATIONS: u32 = 100_000;
+}
 
 impl Crypto for NativeCrypto {
     fn get_extension_files(&self) -> &str {
@@ -25,11 +32,15 @@ impl Crypto for NativeCrypto {
         let mut nonce_bytes = [0u8; 12];
         rand::rng().fill_bytes(&mut salt);
         rand::rng().fill_bytes(&mut nonce_bytes);
-        
-        //key from password and salt
+
+        //derivation key with PBKDF2
         let mut key = [0u8; 32];
-        let input = password + &String::from_utf8_lossy(&salt);
-        key[..input.len().min(32)].copy_from_slice(&input.as_bytes()[..input.len().min(32)]);
+        let _ = pbkdf2::<Hmac<Sha256>>(
+            password.as_bytes(),
+            &salt,
+            Self::PBKDF2_ITERATIONS,
+            &mut key
+        );
 
         //encrypt
         let cipher = ChaCha20Poly1305::new(Key::from_slice(&key));
@@ -65,10 +76,14 @@ impl Crypto for NativeCrypto {
         let nonce_bytes = &file_data[16..28];
         let ciphertext = &file_data[28..];
 
-        //restore key
+        //restore key with PBKDF2
         let mut key = [0u8; 32];
-        let input = password + &String::from_utf8_lossy(salt);
-        key[..input.len().min(32)].copy_from_slice(&input.as_bytes()[..input.len().min(32)]);
+        let _ = pbkdf2::<Hmac<Sha256>>(
+            password.as_bytes(),
+            salt,
+            Self::PBKDF2_ITERATIONS,
+            &mut key
+        );
 
         //decrypt
         let cipher = ChaCha20Poly1305::new(Key::from_slice(&key));

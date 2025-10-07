@@ -1,7 +1,7 @@
 [package]
 name = "totp"
 description = "Command-line TOTP (Time-based One-Time Password) generator for two-factor authentication"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 authors = ["Podvoyskiy Ilya <ilya.podvoyskiy@gmail.com>"]
 license = "MIT"
@@ -16,9 +16,11 @@ chacha20poly1305 = "0.10.1"
 colored = "3.0.0"
 directories = "6.0.0"
 hmac = "0.12.1"
+pbkdf2 = "0.12.2"
 rand = "0.9.2"
 rpassword = "7.4.0"
 sha1 = "0.10.6"
+sha2 = "0.10.9"
 
 [features]
 default = ["native"]
