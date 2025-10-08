@@ -1,8 +1,6 @@
 use std::{io::Write, path::Path, process::{Command, Stdio}};
 
-use colored::Colorize;
-
-use crate::{prelude::{AppError, Totp, Crypto}};
+use crate::{prelude::{AppError, Totp, Crypto, Colorize}};
 
 pub struct GpgCrypto;
 
@@ -26,7 +24,7 @@ impl Crypto for GpgCrypto {
         let secret = self.get_secret()?;
         let password = self.get_password()?;
 
-        println!("{}", "Encrypting...".blue());
+        println!("{}", "Encrypting...".info());
 
         let input = format!("{password}\n{secret}\n");
 
@@ -51,7 +49,7 @@ impl Crypto for GpgCrypto {
             return Err(AppError::Encrypt(format!("Encryption failed: {}", error_msg.trim())));
         }
 
-        println!("{}", format!("Successfully encrypted and saved to: {}", path_to_file.display()).green());
+        println!("{}", format!("Successfully encrypted and saved to: {}", path_to_file.display()).success());
 
         Ok(())
     }
@@ -59,7 +57,7 @@ impl Crypto for GpgCrypto {
     fn decrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
         let password = self.get_password()?;
 
-        println!("{}", "Decrypting...".blue());
+        println!("{}", "Decrypting...".info());
 
         let output = Command::new("gpg")
             .arg("-d")

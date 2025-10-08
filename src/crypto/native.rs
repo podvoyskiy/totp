@@ -1,6 +1,5 @@
 use std::path::Path;
 
-use colored::Colorize;
 use chacha20poly1305::{ChaCha20Poly1305, Key, KeyInit, Nonce};
 use chacha20poly1305::aead::Aead;
 use rand::RngCore;
@@ -8,7 +7,7 @@ use sha2::Sha256;
 use pbkdf2::pbkdf2;
 use hmac::Hmac;
 
-use crate::{prelude::{AppError, Crypto, Totp}};
+use crate::{prelude::{AppError, Crypto, Totp, Colorize}};
 
 pub struct NativeCrypto;
 
@@ -25,7 +24,7 @@ impl Crypto for NativeCrypto {
         let secret = self.get_secret()?;
         let password = self.get_password()?;
 
-        println!("{}", "Encrypting...".blue());
+        println!("{}", "Encrypting...".info());
         
         //generate salt and nonce
         let mut salt = [0u8; 16];
@@ -56,7 +55,7 @@ impl Crypto for NativeCrypto {
         
         std::fs::write(path_to_file, &file_data)?;
 
-        println!("{}", format!("Successfully encrypted and saved to: {}", path_to_file.display()).green());
+        println!("{}", format!("Successfully encrypted and saved to: {}", path_to_file.display()).success());
 
         Ok(())
     }
@@ -64,7 +63,7 @@ impl Crypto for NativeCrypto {
     fn decrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
         let password = self.get_password()?;
 
-        println!("{}", "Decrypting...".blue());
+        println!("{}", "Decrypting...".info());
 
         let file_data = std::fs::read(path_to_file)?;
         if file_data.len() < 28 { // salt(16) + nonce(12) = 28

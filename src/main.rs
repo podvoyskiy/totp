@@ -4,6 +4,7 @@ mod totp;
 mod errors;
 mod storage;
 mod crypto;
+mod colorize;
 mod prelude { 
     pub use crate::totp::Totp;
     pub use crate::errors::AppError;
@@ -11,10 +12,9 @@ mod prelude {
     pub use crate::crypto::{Crypto, NativeCrypto, create_crypto};
     #[allow(unused_imports)]
     pub use crate::crypto::GpgCrypto;
+    pub use crate::colorize::Colorize;
 }
 use prelude::*;
-
-use colored::*;
 
 use std::{env, io};
 
@@ -28,7 +28,7 @@ fn main() -> Result<(), AppError> {
     match args.len() {
         1 => {
             if storage.services.is_empty() {
-                println!("{}", "No services found. Run 'totp --add' to add first service".yellow());
+                println!("{}", "No services found. Run 'totp --add' to add first service".warning());
                 return Ok(());
             }
             println!("Select service:");
@@ -70,7 +70,7 @@ fn main() -> Result<(), AppError> {
 }
 
 fn print_help() {
-    println!("{}{}", "Usage:".yellow().bold(), " totp".blue().bold());
-    println!("{}", "Options:".yellow().bold());
-    println!("{}    Add new service", "  --add".blue().bold());
+    println!("{}{}", "Usage:".warning().bold(), " totp".info().bold());
+    println!("{}", "Options:".warning().bold());
+    println!("{}    Add new service", "  --add".info().bold());
 }

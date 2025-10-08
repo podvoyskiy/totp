@@ -1,8 +1,8 @@
 use std::{error, fmt, io, num::ParseIntError, string::FromUtf8Error, time::SystemTimeError};
 
-use colored::*;
-
 use hmac::digest::InvalidLength;
+
+use crate::prelude::Colorize;
 
 pub enum AppError {
     Io(io::Error),
@@ -23,13 +23,13 @@ impl fmt::Debug for AppError {
 impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let message = match self {
-            AppError::Io(err) => format!("I/O error | {err}").red(),
-            AppError::ParseIntError(err) => format!("Parse int error | {err}").red(),
-            AppError::StorageLoad(msg) => format!("Storage error | {msg}").red(),
-            AppError::InvalidInput(msg) => format!("Invalid input | {msg}").red(),
-            AppError::FailedTOTP(msg) => format!("TOTP error | {msg}").red(),
-            AppError::Encrypt(msg) => format!("Encrypt error | {msg}").red(),
-            AppError::InvalidData => "Invalid data | Decrypted data is not valid UTF-8".to_string() .red(),
+            AppError::Io(err) => format!("I/O error | {err}").error(),
+            AppError::ParseIntError(err) => format!("Parse int error | {err}").error(),
+            AppError::StorageLoad(msg) => format!("Storage error | {msg}").error(),
+            AppError::InvalidInput(msg) => format!("Invalid input | {msg}").error(),
+            AppError::FailedTOTP(msg) => format!("TOTP error | {msg}").error(),
+            AppError::Encrypt(msg) => format!("Encrypt error | {msg}").error(),
+            AppError::InvalidData => "Invalid data | Decrypted data is not valid UTF-8".error(),
         };
         write!(f, "{message}")
     }
