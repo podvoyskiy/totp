@@ -2,7 +2,7 @@ use std::{error, fmt, io, num::ParseIntError, string::FromUtf8Error, time::Syste
 
 use hmac::digest::InvalidLength;
 
-use crate::prelude::Colorize;
+use crate::Colorize;
 
 pub enum AppError {
     Io(io::Error),

@@ -7,7 +7,7 @@ use sha2::Sha256;
 use pbkdf2::pbkdf2;
 use hmac::Hmac;
 
-use crate::{prelude::{AppError, Crypto, Totp, Colorize}};
+use crate::prelude::*;
 
 pub struct NativeCrypto;
 
@@ -16,10 +16,6 @@ impl NativeCrypto {
 }
 
 impl Crypto for NativeCrypto {
-    fn get_extension_files(&self) -> &str {
-        "enc"
-    }
-
     fn encrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
         let secret = self.get_secret()?;
         let password = self.get_password()?;

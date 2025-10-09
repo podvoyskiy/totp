@@ -2,13 +2,9 @@ use std::path::Path;
 
 use rpassword::read_password;
 
-use crate::prelude::{AppError, Totp, NativeCrypto};
-#[allow(unused_imports)]
-use crate::prelude::GpgCrypto;
+use crate::{Totp, AppError};
 
 pub trait Crypto {
-    fn get_extension_files(&self) -> &str;
-
     fn encrypting(&self, path_to_file: &Path) -> Result<(), AppError>;
 
     fn decrypting(&self, path_to_file: &Path) -> Result<(), AppError>;
@@ -25,20 +21,4 @@ pub trait Crypto {
         let password = read_password()?;
         Ok(password)
     }
-}
-
-pub fn create_crypto() -> Box<dyn Crypto> {
-    #[cfg(feature = "gpg")]
-    {
-        if cfg!(target_os = "linux") && GpgCrypto::is_available() {
-            if cfg!(debug_assertions) {
-                println!("🔐 Using GPG encryption");
-            }
-            return Box::new(GpgCrypto);
-        }
-    }
-    if cfg!(debug_assertions) {
-        println!("🔐 Using built-in encryption");
-    }
-    Box::new(NativeCrypto)
 }

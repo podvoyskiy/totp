@@ -1,6 +1,6 @@
 use std::{fs, path::PathBuf};
-use crate::{prelude::{AppError, Crypto}};
 use directories::ProjectDirs;
+use totp::prelude::{AppError, Crypto};
 
 pub struct Storage {
     pub crypto: Box<dyn Crypto>,
@@ -28,7 +28,7 @@ impl Storage {
             .filter_map(Result::ok)
             .map(|entry| entry.path())
             .filter(|path| {
-                path.is_file() && path.extension().is_some_and(|ext| ext == crypto.get_extension_files())
+                path.is_file() && path.extension().is_some_and(|ext| ext == "enc")
             })
             .collect();
 
@@ -40,7 +40,7 @@ impl Storage {
     }
 
     pub fn get_service_path(&self, service_name: &str) -> PathBuf {
-        self.config_dir.join(format!("{}.{}", service_name, self.crypto.get_extension_files()))
+        self.config_dir.join(format!("{service_name}.enc"))
     }
 
     pub fn validate_file_name(service_name: &str) -> bool {
@@ -53,12 +53,12 @@ impl Storage {
 
 #[cfg(test)]
 mod test {
-    use crate::prelude::create_crypto;
+    use totp::prelude::NativeCrypto;
 
     use super::Storage;
 
     #[test]
     fn storage_load() {
-        assert!(Storage::new(create_crypto()).is_ok())
+        assert!(Storage::new(Box::new(NativeCrypto)).is_ok())
     }
 }

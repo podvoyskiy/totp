@@ -1,27 +1,19 @@
 #![warn(clippy::all)]
 
-mod totp;
-mod errors;
 mod storage;
-mod crypto;
-mod colorize;
 mod prelude { 
-    pub use crate::totp::Totp;
-    pub use crate::errors::AppError;
     pub use crate::storage::Storage;
-    pub use crate::crypto::{Crypto, NativeCrypto, create_crypto};
-    #[allow(unused_imports)]
-    pub use crate::crypto::GpgCrypto;
-    pub use crate::colorize::Colorize;
 }
 use prelude::*;
+
+use totp::{AppError, Colorize, NativeCrypto};
 
 use std::{env, io};
 
 fn main() -> Result<(), AppError> {
     let args: Vec<String> = env::args().collect();
 
-    let crypto = create_crypto();
+    let crypto = Box::new(NativeCrypto); //TODO
     
     let storage = Storage::new(crypto)?;
 

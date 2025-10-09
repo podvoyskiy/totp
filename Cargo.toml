@@ -21,6 +21,10 @@ rpassword = "7.4.0"
 sha1 = "0.10.6"
 sha2 = "0.10.9"
 
+[[bin]]
+name = "totp"
+path = "cli/main.rs"
+
 [features]
 default = ["native"]
 gpg = []

@@ -6,7 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::thread;
 use std::time::Duration;
 
-use crate::prelude::AppError;
+use crate::AppError;
 
 type HmacSha1 = Hmac<Sha1>;
 
