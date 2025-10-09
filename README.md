@@ -2,7 +2,7 @@
 
 Command-line TOTP (Time-based One-Time Password) generator for two-factor authentication.
 
-**Platform:** Linux, Windows
+**Platform:** Linux, Windows, MacOS
 
 ### Installation
 
@@ -24,6 +24,18 @@ Command-line TOTP (Time-based One-Time Password) generator for two-factor authen
 
 2. Run in Command Prompt or PowerShell
 
+#### macOS
+
+1. Download Binary
+    ```bash
+    curl -L -o totp https://github.com/podvoyskiy/totp/releases/latest/download/totp-macos
+    ```
+
+2. Make it Executable
+    ```bash
+    chmod +x totp
+    ```
+
 ### Usage
 
 #### First Time Setup
@@ -42,7 +54,7 @@ List and select from available services.
 
 When you run the tool, it will:
 
-    📋 List all available services from ~/.config/totp/
+    📋 List all available services
 
     🔢 Prompt to select a service by number
 

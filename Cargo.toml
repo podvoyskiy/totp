@@ -1,7 +1,7 @@
 [package]
 name = "totp"
 description = "Command-line TOTP (Time-based One-Time Password) generator for two-factor authentication"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2024"
 authors = ["Podvoyskiy Ilya <ilya.podvoyskiy@gmail.com>"]
 license = "MIT"
