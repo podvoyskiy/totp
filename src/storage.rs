@@ -1,5 +1,5 @@
-use std::{fs, path::PathBuf};
-use crate::{prelude::{AppError, Crypto}};
+use std::{fs::{self, remove_file}, path::PathBuf};
+use crate::prelude::{AppError, Colorize, Crypto};
 use directories::ProjectDirs;
 
 pub struct Storage {
@@ -48,6 +48,13 @@ impl Storage {
             return false;
         }
         service_name.chars().all(|c| matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-'))
+    }
+
+    pub fn delete_service(&self, service_index: usize) -> Result<(), AppError> {
+        let path_to_file = &self.services[service_index];
+        remove_file(path_to_file)?;
+        println!("{}", format!("Successfully deleted file: {}", path_to_file.display()).info());
+        Ok(())
     }
 }
 

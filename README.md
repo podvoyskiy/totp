@@ -4,6 +4,10 @@ Command-line TOTP (Time-based One-Time Password) generator for two-factor authen
 
 **Platform:** Linux, Windows, MacOS
 
+**Security:** 
+- **Linux**: Uses GPG for secret encryption
+- **Windows/MacOS**: Native encryption with PBKDF2 key derivation
+
 ### Installation
 
 #### Linux
