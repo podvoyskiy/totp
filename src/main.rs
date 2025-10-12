@@ -10,7 +10,6 @@ mod prelude {
     pub use crate::errors::AppError;
     pub use crate::storage::Storage;
     pub use crate::crypto::{Crypto, NativeCrypto, create_crypto};
-    #[allow(unused_imports)]
     pub use crate::crypto::GpgCrypto;
     pub use crate::colorize::Colorize;
 }

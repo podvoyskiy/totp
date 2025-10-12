@@ -390,7 +390,7 @@ dependencies = [
 
 [[package]]
 name = "totp"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "base32",
  "chacha20poly1305",

@@ -3,7 +3,6 @@ use std::path::Path;
 use rpassword::read_password;
 
 use crate::prelude::{AppError, Totp, NativeCrypto};
-#[allow(unused_imports)]
 use crate::prelude::GpgCrypto;
 
 pub trait Crypto {

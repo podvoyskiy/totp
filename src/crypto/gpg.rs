@@ -5,7 +5,6 @@ use crate::{prelude::{AppError, Totp, Crypto, Colorize}};
 pub struct GpgCrypto;
 
 impl GpgCrypto {
-    #[allow(dead_code)]
     pub fn is_available() -> bool {
         Command::new("gpg")
             .arg("--version")
