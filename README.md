@@ -4,6 +4,10 @@ Command-line TOTP (Time-based One-Time Password) generator for two-factor authen
 
 **Platform:** Linux, Windows, MacOS
 
+**Security:** 
+- **Linux**: Uses GPG for secret encryption
+- **Windows/MacOS**: Native encryption with PBKDF2 key derivation
+
 ### Installation
 
 #### Linux
@@ -38,31 +42,23 @@ Command-line TOTP (Time-based One-Time Password) generator for two-factor authen
 
 ### Usage
 
-#### First Time Setup
+#### Add a Service
 ```bash
 ./totp --add
 ```
 Follow the prompts to add your first TOTP service.
+
+#### Remove a Service
+```bash
+./totp --del
+```
+Select the service you want to delete from the list.
 
 #### Interactive Mode
 ```bash
 ./totp
 ```
 List and select from available services.
-
-### What to Expect
-
-When you run the tool, it will:
-
-    📋 List all available services
-
-    🔢 Prompt to select a service by number
-
-    🔐 Ask for your password to decrypt secret
-
-    ⏱️ Display TOTP code with live countdown timer
-
-    🔄 Automatically update code every 30 seconds
 
 ### Example
 

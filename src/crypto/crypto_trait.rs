@@ -31,13 +31,13 @@ pub fn create_crypto() -> Box<dyn Crypto> {
     {
         if cfg!(target_os = "linux") && GpgCrypto::is_available() {
             if cfg!(debug_assertions) {
-                println!("🔐 Using GPG encryption");
+                println!("Using GPG encryption");
             }
             return Box::new(GpgCrypto);
         }
     }
     if cfg!(debug_assertions) {
-        println!("🔐 Using built-in encryption");
+        println!("Using built-in encryption");
     }
     Box::new(NativeCrypto)
 }
