@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::path::Path;
 
 use chacha20poly1305::{ChaCha20Poly1305, Key, KeyInit, Nonce};
@@ -7,12 +8,18 @@ use sha2::Sha256;
 use pbkdf2::pbkdf2;
 use hmac::Hmac;
 
-use crate::{prelude::{AppError, Crypto, Totp, Colorize}};
+use crate::{prelude::{AppError, Crypto, Colorize}};
 
-pub struct NativeCrypto;
+pub struct NativeCrypto {
+    password_cache: RefCell<Option<String>>
+}
 
 impl NativeCrypto {
     const PBKDF2_ITERATIONS: u32 = 100_000;
+
+    pub fn default() -> Self {
+        Self { password_cache: RefCell::new(None) }
+    } 
 }
 
 impl Crypto for NativeCrypto {
@@ -20,8 +27,8 @@ impl Crypto for NativeCrypto {
         "enc"
     }
 
-    fn encrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
-        let secret = self.get_secret()?;
+    fn encrypting(&self, path_to_file: &Path, secret: String) -> Result<(), AppError> {
+        self.validate_secret(&secret)?;
         let password = self.get_password()?;
 
         println!("{}", "Encrypting...".info());
@@ -60,7 +67,7 @@ impl Crypto for NativeCrypto {
         Ok(())
     }
 
-    fn decrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
+    fn decrypting(&self, path_to_file: &Path) -> Result<String, AppError> {
         let password = self.get_password()?;
 
         println!("{}", "Decrypting...".info());
@@ -92,8 +99,10 @@ impl Crypto for NativeCrypto {
             .map_err(|_| AppError::Encrypt("Decryption failed - wrong password?".into()))?;
         
         let secret = String::from_utf8(decrypted)?;
+        Ok(secret)
+    }
 
-        Totp::display(&secret)?;
-        Ok(())
+    fn get_password_cache(&self) -> &RefCell<Option<String>> {
+        &self.password_cache
     }
 }

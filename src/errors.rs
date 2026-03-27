@@ -12,6 +12,8 @@ pub enum AppError {
     FailedTOTP(String),
     Encrypt(String),
     InvalidData,
+    FileNameError,
+    JsonError(String),
 }
 
 impl fmt::Debug for AppError {
@@ -30,6 +32,8 @@ impl fmt::Display for AppError {
             AppError::FailedTOTP(msg) => format!("TOTP error | {msg}").error(),
             AppError::Encrypt(msg) => format!("Encrypt error | {msg}").error(),
             AppError::InvalidData => "Invalid data | Decrypted data is not valid UTF-8".error(),
+            AppError::FileNameError => "FileNameError | Invalid file name".error(),
+            AppError::JsonError(msg) => format!("Json error | {msg}").error(),
         };
         write!(f, "{message}")
     }
@@ -64,5 +68,11 @@ impl From<InvalidLength> for AppError {
 impl From<FromUtf8Error> for AppError {
     fn from(_value: FromUtf8Error) -> Self {
         AppError::InvalidData
+    }
+}
+
+impl From<serde_json::Error> for AppError {
+    fn from(value: serde_json::Error) -> Self {
+        AppError::JsonError(value.to_string())
     }
 }

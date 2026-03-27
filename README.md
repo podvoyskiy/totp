@@ -42,23 +42,13 @@ Command-line TOTP (Time-based One-Time Password) generator for two-factor authen
 
 ### Usage
 
-#### Add a Service
-```bash
-./totp --add
-```
-Follow the prompts to add your first TOTP service.
-
-#### Remove a Service
-```bash
-./totp --del
-```
-Select the service you want to delete from the list.
-
-#### Interactive Mode
-```bash
-./totp
-```
-List and select from available services.
+| Command | Description |
+|---------|-------------|
+| `./totp` | Interactive mode |
+| `./totp --add` | Add a new TOTP service |
+| `./totp --del` | Remove a service from the list |
+| `./totp --export` | Export all services to JSON backup |
+| `./totp --import` | Import services from JSON backup |
 
 ### Example
 

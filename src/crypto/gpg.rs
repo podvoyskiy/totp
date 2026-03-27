@@ -1,10 +1,16 @@
-use std::{io::Write, path::Path, process::{Command, Stdio}};
+use std::{cell::RefCell, io::Write, path::Path, process::{Command, Stdio}};
 
-use crate::{prelude::{AppError, Totp, Crypto, Colorize}};
+use crate::{prelude::{AppError, Crypto, Colorize}};
 
-pub struct GpgCrypto;
+pub struct GpgCrypto {
+    password_cache: RefCell<Option<String>>
+}
 
 impl GpgCrypto {
+    pub fn default() -> Self {
+        Self { password_cache: RefCell::new(None) }
+    } 
+
     pub fn is_available() -> bool {
         Command::new("gpg")
             .arg("--version")
@@ -19,8 +25,8 @@ impl Crypto for GpgCrypto {
         "gpg"
     }
 
-    fn encrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
-        let secret = self.get_secret()?;
+    fn encrypting(&self, path_to_file: &Path, secret: String) -> Result<(), AppError> {
+        self.validate_secret(&secret)?;
         let password = self.get_password()?;
 
         println!("{}", "Encrypting...".info());
@@ -28,10 +34,11 @@ impl Crypto for GpgCrypto {
         let input = format!("{password}\n{secret}\n");
 
         let mut cmd = Command::new("gpg")
-            .arg("--batch")
-            .arg("--passphrase-fd")
-            .arg("0")
-            .arg("-c")
+            .arg("--batch") //no interactive prompts
+            .arg("--yes") //overwrite output files
+            .arg("--passphrase-fd") //read passphrase from file descriptor
+            .arg("0") //use stdin as passphrase source
+            .arg("-c") //symmetric encryption
             .arg("-o")
             .arg(path_to_file)
             .stdin(Stdio::piped())
@@ -53,7 +60,7 @@ impl Crypto for GpgCrypto {
         Ok(())
     }
 
-    fn decrypting(&self, path_to_file: &Path) -> Result<(), AppError> {
+    fn decrypting(&self, path_to_file: &Path) -> Result<String, AppError> {
         let password = self.get_password()?;
 
         println!("{}", "Decrypting...".info());
@@ -73,10 +80,11 @@ impl Crypto for GpgCrypto {
             return Err(AppError::Encrypt(format!("Decryption failed: {}", error_msg.trim())));
         }
 
-        let secret = String::from_utf8_lossy(&output.stdout).trim().to_owned();
-
-        Totp::display(&secret)?;
-
-        Ok(())
+        let secret = String::from_utf8_lossy(&output.stdout).trim().to_owned();  
+        Ok(secret)
+    }
+    
+    fn get_password_cache(&self) -> &RefCell<Option<String>> {
+        &self.password_cache
     }
 }
