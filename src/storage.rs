@@ -1,6 +1,6 @@
-use std::{fs::{self, File, remove_file}, path::PathBuf};
+use std::{fs::{self, File, remove_file}, path::{Path, PathBuf}};
 use crate::prelude::{AppError, Colorize, Crypto};
-use directories::{ProjectDirs, UserDirs};
+use directories::ProjectDirs;
 
 pub struct Storage {
     pub crypto: Box<dyn Crypto>,
@@ -14,18 +14,9 @@ impl Storage {
         let project_dirs = ProjectDirs::from("", "", env!("CARGO_PKG_NAME"))
             .ok_or(AppError::StorageLoad("Failed to get config dir".into()))?;
 
-        let config_dir = project_dirs.config_dir();
-        
-        if !config_dir.exists() {
-            fs::create_dir_all(config_dir).map_err(|e| AppError::StorageLoad(format!("Failed to create config dir: {e}")))?;
-            println!("Created config dir: {}", config_dir.display());
-        }
+        let config_dir = Self::check_dir(project_dirs.config_dir())?;
 
-        if !config_dir.is_dir() {
-            return Err(AppError::StorageLoad(format!("Config path is not a dir: {}", config_dir.display())));
-        }
-
-        let services: Vec<PathBuf> = fs::read_dir(config_dir)?
+        let services: Vec<PathBuf> = fs::read_dir(&config_dir)?
             .filter_map(Result::ok)
             .map(|entry| entry.path())
             .filter(|path| {
@@ -33,15 +24,12 @@ impl Storage {
             })
             .collect();
 
-        let user_dirs = UserDirs::new().ok_or(AppError::StorageLoad("Failed to get user dirs".into()))?;
-        let dowload_dir = user_dirs.download_dir().ok_or(AppError::StorageLoad("Failed to get download dir".into()))?;
-        let mut backup_file = dowload_dir.to_path_buf();
-        backup_file.push("totp_backup.json");
+        let backup_file = Self::check_dir(project_dirs.cache_dir())?.join("backup.json");
 
         Ok(Self {
             crypto, 
             services,
-            config_dir: config_dir.to_path_buf(),
+            config_dir,
             backup_file,
         })
     }
@@ -80,7 +68,7 @@ impl Storage {
         std::fs::write(&self.backup_file, json_string)?;
 
         println!("{}\nBackup file saved to: {}", 
-            "Warning: Secrets will be stored in plain text!".warning(), 
+            "Warning: Secrets are stored in plain text!".warning(), 
             self.backup_file.display()
         );
         Ok(())
@@ -105,6 +93,17 @@ impl Storage {
         }
 
         Ok(())
+    }
+
+    fn check_dir(dir: &Path) -> Result<PathBuf, AppError> {
+        if !dir.exists() {
+            fs::create_dir_all(dir).map_err(|e| AppError::StorageLoad(format!("Failed to create dir: {e}")))?;
+            println!("Created dir: {}", dir.display());
+        }
+        if !dir.is_dir() {
+            return Err(AppError::StorageLoad(format!("Path is not a dir: {}", dir.display())));
+        }
+        Ok(dir.to_path_buf())
     }
 }
 
