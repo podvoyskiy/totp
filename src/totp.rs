@@ -20,7 +20,7 @@ impl Totp {
         loop {
             let (code, remaining) = Self::generate(secret)?;
             let progress = 30 - remaining;
-            let progress_bar = "█".repeat(progress as usize) + &"░".repeat(remaining as usize);
+            let progress_bar = "█".repeat(usize::try_from(progress)?) + &"░".repeat(usize::try_from(remaining)?);
             
             print!("\rCode: {code} | {progress_bar} | Time remaining: {remaining:2}s");
             std::io::stdout().flush()?;
@@ -45,13 +45,13 @@ impl Totp {
 
         let offset = (hmac_hash[hmac_hash.len() - 1] & 0x0F) as usize;
         
-        let binary_code = ((hmac_hash[offset] as u32 & 0x7F) << 24)
-            | ((hmac_hash[offset + 1] as u32 & 0xFF) << 16)
-            | ((hmac_hash[offset + 2] as u32 & 0xFF) << 8)
-            | (hmac_hash[offset + 3] as u32 & 0xFF);
+        let binary_code = ((u32::from(hmac_hash[offset]) & 0x7F) << 24)
+            | ((u32::from(hmac_hash[offset + 1]) & 0xFF) << 16)
+            | ((u32::from(hmac_hash[offset + 2]) & 0xFF) << 8)
+            | (u32::from(hmac_hash[offset + 3]) & 0xFF);
 
         let width = Self::CODE_LENGTH;
-        let code = binary_code % 10u32.pow(width as u32);
+        let code = binary_code % 10u32.pow(u32::try_from(width)?);
         
         Ok((format!("{code:0>width$}"), time_remaining))
     }

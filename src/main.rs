@@ -1,4 +1,4 @@
-#![warn(clippy::all)]
+#![warn(clippy::pedantic)]
 
 mod totp;
 mod errors;

@@ -23,7 +23,7 @@ impl NativeCrypto {
 }
 
 impl Crypto for NativeCrypto {
-    fn get_extension_files(&self) -> &str {
+    fn get_extension_files(&self) -> &'static str {
         "enc"
     }
 

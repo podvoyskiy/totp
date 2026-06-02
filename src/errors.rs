@@ -1,4 +1,4 @@
-use std::{error, fmt, io, num::ParseIntError, string::FromUtf8Error, time::SystemTimeError};
+use std::{error, fmt, io, num::{ParseIntError, TryFromIntError}, string::FromUtf8Error, time::SystemTimeError};
 
 use hmac::digest::InvalidLength;
 
@@ -6,7 +6,7 @@ use crate::prelude::Colorize;
 
 pub enum AppError {
     Io(io::Error),
-    ParseIntError(ParseIntError),
+    IntError(String),
     StorageLoad(String),
     InvalidInput(String),
     FailedTOTP(String),
@@ -26,7 +26,7 @@ impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let message = match self {
             AppError::Io(err) => format!("I/O error | {err}").error(),
-            AppError::ParseIntError(err) => format!("Parse int error | {err}").error(),
+            AppError::IntError(msg) => msg.error(),
             AppError::StorageLoad(msg) => format!("Storage error | {msg}").error(),
             AppError::InvalidInput(msg) => format!("Invalid input | {msg}").error(),
             AppError::FailedTOTP(msg) => format!("TOTP error | {msg}").error(),
@@ -49,7 +49,13 @@ impl From<io::Error> for AppError {
 
 impl From<ParseIntError> for AppError {
     fn from(value: ParseIntError) -> Self {
-        AppError::ParseIntError(value)
+        AppError::IntError(format!("Parse error: {value}"))
+    }
+}
+
+impl From<TryFromIntError> for AppError {
+    fn from(value: TryFromIntError) -> Self {
+        AppError::IntError(format!("Conversion error: {value}"))
     }
 }
 

@@ -15,13 +15,12 @@ impl GpgCrypto {
         Command::new("gpg")
             .arg("--version")
             .output()
-            .map(|output| output.status.success())
-            .unwrap_or(false)
+            .is_ok_and(|output| output.status.success())
     }
 }
 
 impl Crypto for GpgCrypto {
-    fn get_extension_files(&self) -> &str {
+    fn get_extension_files(&self) -> &'static str {
         "gpg"
     }
 

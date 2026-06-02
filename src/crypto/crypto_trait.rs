@@ -5,7 +5,7 @@ use rpassword::read_password;
 use crate::prelude::{AppError, Totp, NativeCrypto, GpgCrypto, Colorize};
 
 pub trait Crypto {
-    fn get_extension_files(&self) -> &str;
+    fn get_extension_files(&self) -> &'static str;
 
     fn encrypting(&self, path_to_file: &Path, secret: String) -> Result<(), AppError>;
 
