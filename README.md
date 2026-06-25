@@ -1,4 +1,4 @@
-## Simple TOTP CLI Tool
+## TOTP CLI Tool
 
 Command-line TOTP (Time-based One-Time Password) generator for two-factor authentication.
 

@@ -8,7 +8,7 @@ use sha2::Sha256;
 use pbkdf2::pbkdf2;
 use hmac::Hmac;
 
-use crate::{prelude::{AppError, Crypto, Colorize}};
+use crate::prelude::*;
 
 pub struct NativeCrypto {
     password_cache: RefCell<Option<String>>
@@ -27,11 +27,11 @@ impl Crypto for NativeCrypto {
         "enc"
     }
 
-    fn encrypting(&self, path_to_file: &Path, secret: String) -> Result<(), AppError> {
+    fn encrypting(&self, path_to_file: &Path, secret: String) -> Result<()> {
         self.validate_secret(&secret)?;
         let password = self.get_password()?;
 
-        println!("{}", "Encrypting...".info());
+        println!("{}", "Encrypting...".cyan());
         
         //generate salt and nonce
         let mut salt = [0u8; 16];
@@ -62,15 +62,15 @@ impl Crypto for NativeCrypto {
         
         std::fs::write(path_to_file, &file_data)?;
 
-        println!("{}", format!("Successfully encrypted and saved to: {}", path_to_file.display()).success());
+        println!("{}", format!("Successfully encrypted and saved to: {}", path_to_file.display()).green());
 
         Ok(())
     }
 
-    fn decrypting(&self, path_to_file: &Path) -> Result<String, AppError> {
+    fn decrypting(&self, path_to_file: &Path) -> Result<String> {
         let password = self.get_password()?;
 
-        println!("{}", "Decrypting...".info());
+        println!("{}", "Decrypting...".cyan());
 
         let file_data = std::fs::read(path_to_file)?;
         if file_data.len() < 28 { // salt(16) + nonce(12) = 28

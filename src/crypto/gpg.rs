@@ -1,6 +1,6 @@
 use std::{cell::RefCell, io::Write, path::Path, process::{Command, Stdio}};
 
-use crate::{prelude::{AppError, Crypto, Colorize}};
+use crate::prelude::*;
 
 pub struct GpgCrypto {
     password_cache: RefCell<Option<String>>
@@ -24,11 +24,11 @@ impl Crypto for GpgCrypto {
         "gpg"
     }
 
-    fn encrypting(&self, path_to_file: &Path, secret: String) -> Result<(), AppError> {
+    fn encrypting(&self, path_to_file: &Path, secret: String) -> Result<()> {
         self.validate_secret(&secret)?;
         let password = self.get_password()?;
 
-        println!("{}", "Encrypting...".info());
+        println!("{}", "Encrypting...".cyan());
 
         let input = format!("{password}\n{secret}\n");
 
@@ -54,15 +54,15 @@ impl Crypto for GpgCrypto {
             return Err(AppError::Encrypt(format!("Encryption failed: {}", error_msg.trim())));
         }
 
-        println!("{}", format!("Successfully encrypted and saved to: {}", path_to_file.display()).success());
+        println!("{}", format!("Successfully encrypted and saved to: {}", path_to_file.display()).green());
 
         Ok(())
     }
 
-    fn decrypting(&self, path_to_file: &Path) -> Result<String, AppError> {
+    fn decrypting(&self, path_to_file: &Path) -> Result<String> {
         let password = self.get_password()?;
 
-        println!("{}", "Decrypting...".info());
+        println!("{}", "Decrypting...".cyan());
 
         let output = Command::new("gpg")
             .arg("-d")

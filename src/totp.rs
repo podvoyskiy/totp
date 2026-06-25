@@ -6,7 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::thread;
 use std::time::Duration;
 
-use crate::prelude::AppError;
+use crate::prelude::*;
 
 type HmacSha1 = Hmac<Sha1>;
 
@@ -16,7 +16,7 @@ impl Totp {
     const TIME_STEP: u64 = 30;
     const CODE_LENGTH: usize = 6;
 
-    pub fn display(secret: &str) -> Result<(), AppError> {
+    pub fn display(secret: &str) -> Result<()> {
         loop {
             let (code, remaining) = Self::generate(secret)?;
             let progress = 30 - remaining;
@@ -29,7 +29,7 @@ impl Totp {
         }
     }
 
-    pub fn generate(secret: &str) -> Result<(String, u64), AppError> {
+    pub fn generate(secret: &str) -> Result<(String, u64)> {
         let secret = base32::decode(Alphabet::Rfc4648 { padding: false }, &secret.trim().to_uppercase())
             .ok_or_else(|| AppError::FailedTOTP("Invalid base32 secret".into()))?;
 

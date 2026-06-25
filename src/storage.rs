@@ -1,5 +1,5 @@
-use std::{fs::{self, File, remove_file}, path::{Path, PathBuf}};
-use crate::prelude::{AppError, Colorize, Crypto};
+use std::{fs::{self, File}, path::{Path, PathBuf}};
+use crate::prelude::*;
 use directories::ProjectDirs;
 
 pub struct Storage {
@@ -10,14 +10,14 @@ pub struct Storage {
 }
 
 impl Storage {
-    pub fn new(crypto: Box<dyn Crypto>) -> Result<Self, AppError> {
+    pub fn new(crypto: Box<dyn Crypto>) -> Result<Self> {
         let project_dirs = ProjectDirs::from("", "", env!("CARGO_PKG_NAME"))
             .ok_or(AppError::StorageLoad("Failed to get config dir".into()))?;
 
         let config_dir = Self::check_dir(project_dirs.config_dir())?;
 
         let services: Vec<PathBuf> = fs::read_dir(&config_dir)?
-            .filter_map(Result::ok)
+            .filter_map(std::result::Result::ok)
             .map(|entry| entry.path())
             .filter(|path| {
                 path.is_file() && path.extension().is_some_and(|ext| ext == crypto.get_extension_files())
@@ -45,14 +45,11 @@ impl Storage {
         service_name.chars().all(|c| matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-'))
     }
 
-    pub fn delete_service(&self, service_index: usize) -> Result<(), AppError> {
-        let path_to_file = &self.services[service_index];
-        remove_file(path_to_file)?;
-        println!("{}", format!("Successfully deleted file: {}", path_to_file.display()).info());
-        Ok(())
+    pub fn delete_service(&self, service_index: usize) -> Result<()> {
+        Helper::remove_file(&self.services[service_index])
     }
 
-    pub fn export_services(&self) -> Result<(), AppError> {
+    pub fn export_services(&self) -> Result<()> {
         let mut services= Vec::new();
 
         for f in &self.services {
@@ -68,17 +65,17 @@ impl Storage {
         std::fs::write(&self.backup_file, json_string)?;
 
         println!("{}\nBackup file saved to: {}", 
-            "Warning: Secrets are stored in plain text!".warning(), 
+            "Warning: Secrets are stored in plain text!".yellow(), 
             self.backup_file.display()
         );
         Ok(())
     }
 
-    pub fn import_services(&self) -> Result<(), AppError> {
+    pub fn import_services(&self) -> Result<()> {
         if !self.backup_file.exists() {
             return Err(AppError::InvalidInput(format!("Backup file {} not found", self.backup_file.display())));
         }
-
+        
         let file = File::open(&self.backup_file)?;
         let services: Vec<(String, String)> = serde_json::from_reader(file)?;
 
@@ -92,10 +89,14 @@ impl Storage {
             self.crypto.encrypting(&self.get_service_path(&service_name), service_secret)?;
         }
 
+        if Helper::confirm("Do you want to delete backup file? (y/n):".yellow()) {
+            Helper::remove_file(&self.backup_file)?;
+        }
+
         Ok(())
     }
 
-    fn check_dir(dir: &Path) -> Result<PathBuf, AppError> {
+    fn check_dir(dir: &Path) -> Result<PathBuf> {
         if !dir.exists() {
             fs::create_dir_all(dir).map_err(|e| AppError::StorageLoad(format!("Failed to create dir: {e}")))?;
             println!("Created dir: {}", dir.display());

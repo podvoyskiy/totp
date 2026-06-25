@@ -2,7 +2,7 @@ use std::{error, fmt, io, num::{ParseIntError, TryFromIntError}, string::FromUtf
 
 use hmac::digest::InvalidLength;
 
-use crate::prelude::Colorize;
+use crate::prelude::*;
 
 pub enum AppError {
     Io(io::Error),
@@ -14,6 +14,7 @@ pub enum AppError {
     InvalidData,
     FileNameError,
     JsonError(String),
+    RemoveFile(String),
 }
 
 impl fmt::Debug for AppError {
@@ -25,15 +26,16 @@ impl fmt::Debug for AppError {
 impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let message = match self {
-            AppError::Io(err) => format!("I/O error | {err}").error(),
-            AppError::IntError(msg) => msg.error(),
-            AppError::StorageLoad(msg) => format!("Storage error | {msg}").error(),
-            AppError::InvalidInput(msg) => format!("Invalid input | {msg}").error(),
-            AppError::FailedTOTP(msg) => format!("TOTP error | {msg}").error(),
-            AppError::Encrypt(msg) => format!("Encrypt error | {msg}").error(),
-            AppError::InvalidData => "Invalid data | Decrypted data is not valid UTF-8".error(),
-            AppError::FileNameError => "FileNameError | Invalid file name".error(),
-            AppError::JsonError(msg) => format!("Json error | {msg}").error(),
+            AppError::Io(err) => format!("I/O error | {err}").red(),
+            AppError::IntError(msg) => msg.red(),
+            AppError::StorageLoad(msg) => format!("Storage error | {msg}").red(),
+            AppError::InvalidInput(msg) => format!("Invalid input | {msg}").red(),
+            AppError::FailedTOTP(msg) => format!("TOTP error | {msg}").red(),
+            AppError::Encrypt(msg) => format!("Encrypt error | {msg}").red(),
+            AppError::InvalidData => "Invalid data | Decrypted data is not valid UTF-8".red(),
+            AppError::FileNameError => "FileNameError | Invalid file name".red(),
+            AppError::JsonError(msg) => format!("Json error | {msg}").red(),
+            AppError::RemoveFile(path_to_file) => format!("Failed to delete file: {path_to_file}").red(),
         };
         write!(f, "{message}")
     }

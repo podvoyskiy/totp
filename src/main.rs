@@ -5,19 +5,23 @@ mod errors;
 mod storage;
 mod crypto;
 mod colorize;
+mod helper;
 mod prelude { 
     pub use crate::totp::Totp;
     pub use crate::errors::AppError;
     pub use crate::storage::Storage;
     pub use crate::crypto::{Crypto, NativeCrypto, GpgCrypto, create_crypto};
     pub use crate::colorize::Colorize;
+    pub use crate::helper::Helper;
+
+    pub type Result<T> = std::result::Result<T, AppError>;
 }
 use prelude::*;
 
 use std::{env, io, process};
 use rpassword::read_password;
 
-fn main() -> Result<(), AppError> {
+fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
 
     let crypto = create_crypto();
@@ -39,7 +43,7 @@ fn main() -> Result<(), AppError> {
     }
 }
 
-fn handle_command(storage: &Storage, command: &str) -> Result<(), AppError> {
+fn handle_command(storage: &Storage, command: &str) -> Result<()> {
     match command {
         "--add" => add_service(storage),
         "--del" => delete_service(storage),
@@ -52,9 +56,9 @@ fn handle_command(storage: &Storage, command: &str) -> Result<(), AppError> {
     }
 }
 
-fn select_service(storage: &Storage)-> Result<usize, AppError> {
+fn select_service(storage: &Storage)-> Result<usize> {
     if storage.services.is_empty() {
-        println!("{}", "No services found. Run 'totp --add' to add first service".warning());
+        println!("{}", "No services found. Run 'totp --add' to add first service".yellow());
         process::exit(0);
     }
                 
@@ -75,7 +79,7 @@ fn select_service(storage: &Storage)-> Result<usize, AppError> {
     Ok(choice - 1)
 }
 
-fn add_service(storage: &Storage) -> Result<(), AppError> {
+fn add_service(storage: &Storage) -> Result<()> {
     println!("Enter service name:");
     let mut service_name = String::new();
     io::stdin().read_line(&mut service_name)?;
@@ -92,28 +96,28 @@ fn add_service(storage: &Storage) -> Result<(), AppError> {
     Ok(())
 }
 
-fn delete_service(storage: &Storage) -> Result<(), AppError> {
+fn delete_service(storage: &Storage) -> Result<()> {
     let service_index = select_service(storage)?;
     storage.delete_service(service_index)
 }
 
-fn export_services(storage: &Storage) -> Result<(), AppError> {
+fn export_services(storage: &Storage) -> Result<()> {
     if storage.services.is_empty() {
-        println!("{}", "No services found for export".warning());
+        println!("{}", "No services found for export".yellow());
         process::exit(0);
     }
     storage.export_services()
 }
 
-fn import_services(storage: &Storage) -> Result<(), AppError> {
+fn import_services(storage: &Storage) -> Result<()> {
     storage.import_services()
 }
 
 fn print_help() {
-    println!("{}{}", "Usage:".warning().bold(), " totp".info());
-    println!("{}", "Options:".warning().bold());
-    println!("{}       Add new service", "  --add".info());
-    println!("{}       Delete service", "  --del".info());
-    println!("{}    Export services to json", "  --export".info());
-    println!("{}    Import services from json", "  --import".info());
+    println!("{}{}", "Usage:".yellow().bold(), " totp".cyan());
+    println!("{}", "Options:".yellow().bold());
+    println!("{}       Add new service", "  --add".cyan());
+    println!("{}       Delete service", "  --del".cyan());
+    println!("{}    Export services to json", "  --export".cyan());
+    println!("{}    Import services from json", "  --import".cyan());
 }
