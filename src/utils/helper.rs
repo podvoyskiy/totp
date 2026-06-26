@@ -1,5 +1,5 @@
 use std::{fmt::Display, fs::remove_file, path::Path};
-use chrono::{DateTime, Local, Utc};
+use chrono::{DateTime, Utc};
 use rsntp::SntpClient;
 
 use crate::prelude::*;
@@ -20,7 +20,11 @@ impl Helper {
             .map_err(|_| AppError::RemoveFile(path.display().to_string()))
     }
 
-    pub fn check_time() -> Result<()> {
+    pub fn check_time() -> Result<i64> {
+        Self::check_time_with(&RealTimeProvider)
+    }
+
+    fn check_time_with<T: TimeProvider>(time_provider: &T) -> Result<i64> {
         let client = SntpClient::new();
         let sync_result = client
             .synchronize("pool.ntp.org")
@@ -31,7 +35,7 @@ impl Helper {
             .into_chrono_datetime()
             .map_err(|err| AppError::Ntp(err.to_string()))?;
         
-        let local_utc= Local::now().with_timezone(&Utc);
+        let local_utc= time_provider.now_utc();
 
         let diff = (local_utc - ntp_utc).num_seconds().abs();
 
@@ -40,7 +44,24 @@ impl Helper {
             println!("{}", format!("System clock is {diff_sign} by {diff} seconds. TOTP codes may not work correctly.").yellow());
         }
 
-        Ok(())
+        Ok(diff)
     }
 }
 
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_with_real_time() {
+        let diff = Helper::check_time_with(&RealTimeProvider).unwrap();
+        assert!(diff <= 5);
+    }
+
+    #[test]
+    fn test_with_mock_time() {
+        let provider = MockTimeProvider::new(10);
+        let diff = Helper::check_time_with(&provider).unwrap();
+        assert!(diff > 5);
+    }
+}

@@ -4,21 +4,19 @@ mod totp;
 mod errors;
 mod storage;
 mod crypto;
-mod colorize;
-mod helper;
+mod utils;
 mod prelude { 
     pub use crate::totp::Totp;
     pub use crate::errors::AppError;
     pub use crate::storage::Storage;
     pub use crate::crypto::{Crypto, NativeCrypto, GpgCrypto, create_crypto};
-    pub use crate::colorize::Colorize;
-    pub use crate::helper::Helper;
+    pub use crate::utils::*;
 
     pub type Result<T> = std::result::Result<T, AppError>;
 }
 use prelude::*;
 
-use std::{env, io, process::{self}};
+use std::{env, io, process};
 use rpassword::read_password;
 
 fn main() -> Result<()> {
