@@ -18,7 +18,7 @@ mod prelude {
 }
 use prelude::*;
 
-use std::{env, io, process};
+use std::{env, io, process::{self}};
 use rpassword::read_password;
 
 fn main() -> Result<()> {
@@ -32,6 +32,7 @@ fn main() -> Result<()> {
         1 => {
             let service_index = select_service(&storage)?;
             let secret = storage.crypto.decrypting(&storage.services[service_index])?;
+            let _ = Helper::check_time();
             Totp::display(&secret)?;
             Ok(())
         }
