@@ -49,6 +49,7 @@ Command-line TOTP (Time-based One-Time Password) generator for two-factor authen
 | `./totp --del` | Remove a service from the list |
 | `./totp --export` | Export all services to JSON backup |
 | `./totp --import` | Import services from JSON backup |
+| `./totp --qr` | Show service as QR code |
 
 ### Example
 

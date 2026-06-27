@@ -21,7 +21,7 @@ pub trait Crypto {
     fn get_password(&self) -> Result<String> {
         let password_cache = self.get_password_cache();
 
-        if let Some(stored) = password_cache.borrow().clone() && Helper::confirm("Use the same password? (y/n):".green()) {
+        if let Some(stored) = password_cache.borrow().clone() && Helper::confirm("Use the same password? (y/n):".dimmed()) {
             return Ok(stored);
         }
 
@@ -39,13 +39,13 @@ pub fn create_crypto() -> Box<dyn Crypto> {
     {
         if cfg!(target_os = "linux") && GpgCrypto::is_available() {
             if cfg!(debug_assertions) {
-                println!("==={}===", "Using GPG encryption".bold());
+                println!("{}", "=== Using GPG encryption ===".bold().dimmed());
             }
             return Box::new(GpgCrypto::default());
         }
     }
     if cfg!(debug_assertions) {
-        println!("==={}===", "Using built-in encryption".bold());
+        println!("{}", "=== Using built-in encryption ===".bold().dimmed());
     }
     Box::new(NativeCrypto::default())
 }

@@ -48,6 +48,7 @@ fn handle_command(storage: &Storage, command: &str) -> Result<()> {
         "--del" => delete_service(storage),
         "--export" => export_services(storage),
         "--import" => import_services(storage),
+        "--qr" => qrcode(storage),
         _ => {
             print_help();
             Ok(())
@@ -85,7 +86,7 @@ fn add_service(storage: &Storage) -> Result<()> {
     service_name = service_name.trim().to_string();
 
     if !Storage::validate_file_name(&service_name) {
-        return Err(AppError::InvalidInput("incorrect service name".into()));
+        return Err(AppError::InvalidInput("Incorrect service name".into()));
     }
 
     println!("Insert TOTP secret:");
@@ -112,6 +113,16 @@ fn import_services(storage: &Storage) -> Result<()> {
     storage.import_services()
 }
 
+fn qrcode(storage: &Storage) -> Result<()> {
+    let service_index = select_service(storage)?;
+    let secret = storage.crypto.decrypting(&storage.services[service_index])?;
+
+    let label = &storage.services[service_index].file_stem()
+        .ok_or_else(|| AppError::Qrcode("Failed to get label service".to_string()))?;
+
+    qr::display(&label.to_string_lossy(), &secret)
+}
+
 fn print_help() {
     println!("{}{}", "Usage:".yellow().bold(), " totp".cyan());
     println!("{}", "Options:".yellow().bold());
@@ -119,4 +130,5 @@ fn print_help() {
     println!("{}       Delete service", "  --del".cyan());
     println!("{}    Export services to json", "  --export".cyan());
     println!("{}    Import services from json", "  --import".cyan());
+    println!("{}        Show service as QR code", "  --qr".cyan());
 }

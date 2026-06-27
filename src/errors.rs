@@ -16,6 +16,7 @@ pub enum AppError {
     JsonError(String),
     RemoveFile(String),
     Ntp(String),
+    Qrcode(String),
 }
 
 impl fmt::Debug for AppError {
@@ -38,6 +39,7 @@ impl fmt::Display for AppError {
             AppError::JsonError(msg) => format!("Json error | {msg}").red(),
             AppError::RemoveFile(path_to_file) => format!("Failed to delete file: {path_to_file}").red(),
             AppError::Ntp(msg) => format!("NTP error | {msg}").red(),
+            AppError::Qrcode(msg) => format!("Qrcode error | {msg}").red(),
         };
         write!(f, "{message}")
     }

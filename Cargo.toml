@@ -1,7 +1,7 @@
 [package]
 name = "totp"
 description = "Command-line TOTP (Time-based One-Time Password) generator for two-factor authentication"
-version = "0.3.3"
+version = "0.3.4"
 edition = "2024"
 authors = ["Podvoyskiy Ilya <ilya.podvoyskiy@gmail.com>"]
 license = "MIT"
@@ -23,6 +23,7 @@ rsntp = { version = "4.1.2", default-features = false, features = ["chrono"] }
 serde_json = "1.0.149"
 sha1 = "0.10.6"
 sha2 = "0.10.9"
+qrcode = "0.14.1"
 
 [features]
 default = ["gpg"]
