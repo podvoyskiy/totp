@@ -15,6 +15,9 @@ pub fn display(label: &str, secret: &str) -> Result<()> {
 
     println!("{image}");
     println!("{}", "Scan this QR code with your authenticator app to add this service".dimmed());
+    println!();
+    println!("{}", "If you can't scan the QR code, enter this key manually:".dimmed());
+    println!("  {secret}");
     Ok(())
 }
 

@@ -16,13 +16,14 @@ impl Storage {
 
         let config_dir = Self::check_dir(project_dirs.config_dir())?;
 
-        let services: Vec<PathBuf> = fs::read_dir(&config_dir)?
+        let mut services: Vec<PathBuf> = fs::read_dir(&config_dir)?
             .filter_map(std::result::Result::ok)
             .map(|entry| entry.path())
             .filter(|path| {
                 path.is_file() && path.extension().is_some_and(|ext| ext == crypto.get_extension_files())
             })
             .collect();
+        services.sort();
 
         let backup_file = Self::check_dir(project_dirs.cache_dir())?.join("backup.json");
 
